@@ -1,9 +1,8 @@
 
 class maxSubArr{
 
-	public maxSubArr(){
+	public maxSubArr(){}
 
-	}
 	public int maxSubArr(int nums[]){
 		int maxSum=nums[0];
 		int currSum=0;
