@@ -15,10 +15,10 @@ class CountLOC {
 
 	public static int count(String text) throws IOException {
 		try (BufferedReader in = new BufferedReader(new StringReader(text))) {
-		    long count = in.lines()
-					.filter(CountLOC::isNotComment)
-					.count();
-		    return (int) count;
+			long count = in.lines()
+				.filter(CountLOC::isNotComment)
+				.count();
+			return (int) count;
 		}
 	}
 
@@ -36,9 +36,9 @@ class CountLOC {
 			 * We could have easily used Files.lines(path)
 			 * Ofcourse we can construct path from static factory Path.get(filename)
 			 */
-        byte[] readBytes = Files.readAllBytes(Paths.get(args[0]));
-        String text = new String(readBytes); 
-        System.out.println(CountLOC.count(text));
+			byte[] readBytes = Files.readAllBytes(Paths.get(args[0]));
+			String text = new String(readBytes); 
+			System.out.println(CountLOC.count(text));
 		} catch (IOException ex) {
 			//
 		}
