@@ -1,6 +1,8 @@
-import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.stream.IntStream;
 
@@ -40,17 +42,16 @@ class Topsort {
 		int i = 0;
 		
 		while (!queue.isEmpty()) {
-			int node = queue.remove();
-			topOrder[i++] = node;
-			if (adjacentMap.containsKey(node)) {
-				int[] neighbours = adjacentMap.get(node);
-				for (Integer neighbour : neighbours) {
-				    inDegree[neighbour]--;
-					  if (inDegree[neighbour] == 0) {
-						    queue.add(neighbour);
-						}
-				}
-			}
+		    int node = queue.remove();
+		    topOrder[i++] = node;
+		    if (adjacentMap.containsKey(node)) {
+				    for (Integer neighbour : adjacentMap.get(node)) {
+				        inDegree[neighbour]--;
+					      if (inDegree[neighbour] == 0) {
+						        queue.add(neighbour);
+					      }
+			      }
+			  }
 		}
 
 		if (i == elements)
