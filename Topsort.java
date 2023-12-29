@@ -9,7 +9,7 @@ class Topsort {
 		/* model the Graph: [[a,b]]
 		 * where a,b is the dest,src respectively
 		 */
-		Map<Integer, List<Integer>> adjacentList = new HashMap<>();
+		Map<Integer, List<Integer>> adjacentMap = new HashMap<>();
 		/*
 		 * in-degree of each node
 		 */
@@ -22,10 +22,10 @@ class Topsort {
 			int src = preqs[i][1];
 			int dest = preqs[i][0];
 
-			List<Integer> list = adjacentList.getOrDefault(src,
+			List<Integer> list = adjacentMap.getOrDefault(src,
 					new ArrayList<Integer>());
 			list.add(dest);
-			adjacentList.put(src, list);
+			adjacentMap.put(src, list);
 			inDegree[dest] += 1;
 		}
 		/*
@@ -42,18 +42,14 @@ class Topsort {
 		while (!queue.isEmpty()) {
 			int node = queue.remove();
 			topOrder[i++] = node;
-			if (adjacentList.containsKey(node)) {
-				int[] neighbours = adjacentList.get(node);
-				adjacentList.forEach(
-						(node, neighbours) -> {
-							for (Integer neighbour : neighbours) {
-								inDegree[neighbour]--;
-								if (inDegree[neighbour] == 0) {
-									queue.add(neighbour);
-								}
-							}
+			if (adjacentMap.containsKey(node)) {
+				int[] neighbours = adjacentMap.get(node);
+				for (Integer neighbour : neighbours) {
+				    inDegree[neighbour]--;
+					  if (inDegree[neighbour] == 0) {
+						    queue.add(neighbour);
 						}
-						);
+				}
 			}
 		}
 
