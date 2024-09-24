@@ -1,13 +1,14 @@
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 class CubeNumbers {
 
 	// cube of numbers greater than value 50
-	public static void cubeNumbers(int[] numbers) {
-		IntStream
+	public static void cubeNumbers(double[] numbers) {
+		DoubleStream
 			.of(numbers)
-			.mapToDouble(CubeNumbers::cube)
+			.map(CubeNumbers::cube)
 			.filter(CubeNumbers::isGreaterThan50)
 			.forEach(System.out::println);
 	}
@@ -27,7 +28,7 @@ class CubeNumbers {
 		return Double.compare(number, 50) > 0;
 	}
 
-	private static double cube(int number) {
+	private static double cube(double number) {
 		return Math.pow(number, 3);
 	}
 
@@ -38,9 +39,9 @@ class CubeNumbers {
 	}
 
 	public static void main(String[] args) {
-		int[] nums = Stream
+		double[] nums = Stream
 			.of(args)
-			.mapToInt(Integer::parseInt)
+			.mapToDouble(Double::parseDouble)
 			.toArray();
 		CubeNumbers.cubeNumbers(nums);
 	}
