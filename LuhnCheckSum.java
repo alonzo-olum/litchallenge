@@ -1,5 +1,8 @@
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.IntStream;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /*
  * LuhnCheckSum a widely used system for validation of
@@ -11,6 +14,48 @@ import java.util.stream.Stream;
  * we then check if the total sum is divisible by 10.
  */
 public class LuhnCheckSum {
+
+	// oddLengthChecksum calculates the checksum of odd digits
+	private static int oddLengthChecksum(int[] digits) {
+		Predicate<Integer> filterFn = i -> i % 2 == 0;
+		Function<Integer, Integer> mapperFn = i -> add(2 * digits[i-1]);
+		int evenPositions =
+			LuhnCheckSum
+			.filterAndMap(IntStream.range(1, digits.length),
+					filterFn, mapperFn);
+
+		filterFn = i -> i % 2 != 0;
+		mapperFn = i -> add(digits[i-1]);
+		// +1 in odd positions indicates the last digit is inclusive
+		int oddPositions =
+			LuhnCheckSum
+			.filterAndMap(IntStream.range(1, digits.length+1),
+					filterFn, mapperFn);
+
+		return oddPositions + evenPositions;
+	}
+
+		// evenLengthChecksum calculates the checksum of even digits
+	private static int evenLengthChecksum(int[] digits) {
+		Predicate<Integer> filterFn = i -> i % 2 != 0;
+		Function<Integer, Integer> mapperFn = i -> add(2 * digits[i-1]);
+		// for odd positions we know we can omit the last digit
+		int oddPositions =
+			LuhnCheckSum
+			.filterAndMap(IntStream.range(1, digits.length),
+					filterFn, mapperFn);
+
+		filterFn = i -> i % 2 == 0;
+		mapperFn = i -> add(digits[i-1]);
+		// +1 in even positions indicates the last digit is inclusive
+		int evenPositions =
+			LuhnCheckSum
+			.filterAndMap(IntStream.range(1, digits.length+1),
+					filterFn, mapperFn);
+
+		return oddPositions + evenPositions;
+	}
+
 	private static int add(int num) {
 		int checkSum = 0;
 		while (num != 0) {
@@ -18,42 +63,21 @@ public class LuhnCheckSum {
 			num /= 10;
 			checkSum += pop;
 		}
-		System.out.println("add: " + checkSum);
 		return checkSum;
 	}
 
-	// oddLengthChecksum calculates the checksum of odd digits
-	private static int oddLengthChecksum(int[] digits) {
-		// for even positions we know we can omit the last digit
-		int evenPositions = IntStream.range(1, digits.length)
-			.filter(i -> i % 2 == 0)
-			.map(i -> add(2 * digits[i-1]))
+	private static int filterAndMap(IntStream istream, Predicate<Integer> filter, Function<Integer, Integer> mapper) {
+		IntStream filteredStream = LuhnCheckSum.filter(istream, filter);
+		return LuhnCheckSum.map(filteredStream, mapper)
 			.sum();
-		System.out.println("evenPositions for odd-length checksum: " + evenPositions);
-		// +1 in odd positions indicates the last digit is inclusive
-		int oddPositions = IntStream.range(1, digits.length+1)
-			.filter(i -> i % 2 != 0)
-			.map(i -> add(digits[i-1]))
-			.sum();
-		System.out.println("oddPositions for odd-length checksum: " + oddPositions);
-		return oddPositions + evenPositions;
 	}
 
-	// evenLengthChecksum calculates the checksum of even digits
-	private static int evenLengthChecksum(int[] digits) {
-		// for odd positions we know we can omit the last digit
-		int oddPositions = IntStream.range(1, digits.length)
-			.filter(i -> i % 2 != 0)
-			.map(i -> add(2 * digits[i-1]))
-			.sum();
-		System.out.println("oddPositions for even-length checksum: " + oddPositions);
-		// +1 in even positions indicates the last digit is inclusive
-		int evenPositions = IntStream.range(1, digits.length+1)
-			.filter(i -> i % 2 == 0)
-			.map(i -> add(digits[i-1]))
-			.sum();
-		System.out.println("evenPositions for even-length checksum: " + evenPositions);
-		return oddPositions + evenPositions;
+	private static IntStream filter(IntStream istream, Predicate<Integer> predicate) {
+		return istream.filter(predicate::test);
+	}
+
+	private static IntStream map(IntStream istream, Function<Integer, Integer> mapper) {
+		return istream.map(mapper::apply);
 	}
 
 	private static void calculateChecksum(int[] digits) {
