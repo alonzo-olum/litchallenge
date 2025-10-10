@@ -22,7 +22,6 @@ public class SkylineProblem {
 	 * */
 	public ArrayList<Skyline> findSkyline(int start, int end) {
 		// Base Case: we have one building
-
 		ArrayList<Skyline> list = new ArrayList<>();
 		if (start == end) {
 			Building building = buildings.get(start);
@@ -33,11 +32,16 @@ public class SkylineProblem {
 		// divide whole list into equal sub-problems
 		int mid = (start + end) / 2;
 		ArrayList<Skyline> sky1 = this.findSkyline(start, mid);
-
 		ArrayList<Skyline> sky2 = this.findSkyline(mid+1, end);
+
 		return mergeSkyline(sky1, sky2);
 	}
 
+	/*
+	 * merge individual building coordinate
+	 * @param sky1 each skyline from the left hemisphere
+	 * @param sky2 each skyline from the right hemisphere
+	 */
 	public ArrayList<Skyline> mergeSkyline(ArrayList<Skyline> sky1, ArrayList<Skyline> sky2) {
 		int current_height = 0;
 		int next_height = 0;
@@ -81,7 +85,6 @@ public class SkylineProblem {
 			skyline.add(sky1.get(0));
 			sky1.remove(0);
 		}
-
 		while (!sky2.isEmpty()) {
 			skyline.add(sky2.get(0));
 			skyline.remove(0);
