@@ -1,17 +1,49 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import java.util.stream.Collectors;
 
 public class SkylineProblem {
+	public static void main(String[] args) {
+		SkylineProblem.Builder builder = new SkylineProblem.Builder()
+			.add(new int[][]{{2, 9, 10}, {3, 7, 15}, {5, 12, 12}, {15, 20, 10}, {19, 24, 8}});
+		List<Building> buildings = builder.build();
 
-	ArrayList<Building> buildings = new ArrayList<>();
-	int count = 0;
-	/*
-	 * add a skyline
-	 * @param start starting coordinate of building
-	 * @param height height of building
-	 * @param end ending coordinate of building
+		List<Skyline> result = SkylineProblem.findSkyline(buildings);
+		result.stream().forEach(s -> System.out.println("["+s.coordinate+", "+s.height+"]"));
+	}
+
+
+	private static class Builder {
+		private int count = 0;
+		private List<Building> buildings;
+
+	 /*
+	  * add a skyline
+	  * @param array of building coordinates [{left, right, height},...]
 	 * */
-	public void add(int start, int height, int end) {
-		buildings.add(count++, new Building(start, height, end));
+		public Builder add(int[][] builds) {
+			buildings = Arrays.stream(builds)
+				.map(b -> new Building(b[0], b[2], b[1]))
+				.collect(Collectors.toList());
+			//buildings = Arrays.stream(builds).collect(ArrayList::new, (list, b) -> list.add(new Building(b[0], b[2], b[1])), ArrayList::addAll);
+			return this;
+		}
+		public List<Building> build() {
+			return this.buildings;
+		}
+	}
+
+	/*
+	 * find a skyline given a list of building coordinates
+	 * @param List<Building>
+	 * */
+	public static List<Skyline> findSkyline(List<Building> buildings) {
+		if (buildings.isEmpty()) {
+			new ArrayList<>();
+		}
+		return divideConquer(buildings, 0, buildings.size() - 1);
 	}
 
 	/*
@@ -20,96 +52,93 @@ public class SkylineProblem {
 	 * @param start starting index of building to scan
 	 * @param end ending index of building to scan
 	 * */
-	public ArrayList<Skyline> findSkyline(int start, int end) {
+	private static List<Skyline> divideConquer(List<Building> buildings, int left, int right) {
 		// Base Case: we have one building
-		ArrayList<Skyline> list = new ArrayList<>();
-		if (start == end) {
-			Building building = buildings.get(start);
-			list.add(new Skyline(building.start, building.height));
-			list.add(new Skyline(building.end, 0));
-			return list;
+		if (left == right) {
+			List<Skyline> result = new ArrayList<>();
+			int l = buildings.get(left).start;
+			int r = buildings.get(left).end;
+			int height = buildings.get(left).height;
+			result.add(new Skyline(l, height));
+			result.add(new Skyline(r, 0));
+			return result;
 		}
-		// divide whole list into equal sub-problems
-		int mid = (start + end) / 2;
-		ArrayList<Skyline> sky1 = this.findSkyline(start, mid);
-		ArrayList<Skyline> sky2 = this.findSkyline(mid+1, end);
 
-		return mergeSkyline(sky1, sky2);
+		int mid = left + (right-left) / 2;
+		List<Skyline> leftSky = divideConquer(buildings, left, mid);
+		List<Skyline> rightSky = divideConquer(buildings, mid + 1, right);
+
+		return mergeSkyline(leftSky, rightSky);
 	}
 
 	/*
-	 * merge individual building coordinate
-	 * @param sky1 each skyline from the left hemisphere
-	 * @param sky2 each skyline from the right hemisphere
+	 * merge each soleved subproblem to the recurring solved subproblem
+	 * @param List<Skyline> left
+	 * @param List<Skyline> right
 	 */
-	public ArrayList<Skyline> mergeSkyline(ArrayList<Skyline> sky1, ArrayList<Skyline> sky2) {
-		int current_height = 0;
-		int next_height = 0;
-		ArrayList<Skyline> skyline = new ArrayList<>();
-		int max_height = 0;
+	private static List<Skyline> mergeSkyline(List<Skyline> start, List<Skyline> end) {
+		List<Skyline> result = new ArrayList<>();
 
-		// merge two skylines
-		while (!sky1.isEmpty() && !sky2.isEmpty()) {
-			if (sky1.get(0).coordinates < sky2.get(0).coordinates) {
-				int current_start = sky1.get(0).coordinates;
-				current_height = sky1.get(0).height;
+		int i = 0, j = 0;
+		int h1 = 0, h2 = 0;
 
-				if (current_height < next_height) {
-					sky1.remove(0);
-					if (max_height != next_height) {
-						skyline.add(new Skyline(current_start, next_height));
-					}
-				} else {
-					max_height = current_height;
-					sky1.remove(0);
-					skyline.add(new Skyline(current_start, current_height));
-				}
+		while (i < start.size() || j < end.size()) {
+			long startX = (i < start.size()) ? start.get(i).coordinate : Long.MAX_VALUE;
+			long endX = (j < end.size()) ? end.get(j).coordinate : Long.MAX_VALUE;
+
+			if (startX < endX) {
+				// case where left lt than right
+				h1 = start.get(i).height;
+				addPoint(result, (int)startX, Math.max(h1, h2));
+				i++;
+			} else if(startX > endX) {
+				// case where left gt than right
+				h2 = end.get(j).height;
+				addPoint(result, (int)endX, Math.max(h1, h2));
+				j++;
 			} else {
-				int current_start = sky2.get(0).coordinates;
-				current_height = sky2.get(0).height;
-
-				if (next_height < current_height) {
-					sky2.remove(0);
-					if (max_height != current_height) {
-						skyline.add(new Skyline(current_start, current_height));
-					}
-				} else {
-					max_height = next_height;
-					sky2.remove(0);
-					skyline.add(new Skyline(current_start, next_height));
-				}
+				// case where left eq to right
+				h1 = start.get(i).height;
+				h2 = end.get(j).height;
+				addPoint(result, (int)startX, Math.max(h1, h2));
+				i++;
+				j++;
 			}
 		}
-		// Any remaining points from sky1 or sky2
-		while (!sky1.isEmpty()) {
-			skyline.add(sky1.get(0));
-			sky1.remove(0);
-		}
-		while (!sky2.isEmpty()) {
-			skyline.add(sky2.get(0));
-			skyline.remove(0);
-		}
 
-		return skyline;
+		return result;
+	}
+
+	/*
+	 * add point acts as a visitor method that populates the actual skyline
+	 * @param List<Skyline>
+	 * @param int [x coordinate]
+	 * @param int [height]
+	 */
+	private static void addPoint(List<Skyline> result, int x, int h) {
+		if (result.isEmpty() || result.get(result.size() - 1).height != h) {
+			result.add(new Skyline(x, h));
+			// For debugging purposes
+			//System.out.println("Added point: [x, h] :["+ x +", "+ h +"]");
+		}
 	}
 
 	private static class Skyline {
-		int coordinates, height;
+		int coordinate, height;
 
-		Skyline(int coordinates, int height) {
-			this.coordinates = coordinates;
+		Skyline(int coordinate, int height) {
+			this.coordinate = coordinate;
 			this.height = height;
 		}
 	}
 
 	private static class Building {
-		public int start, height, end;
+		int start, height, end;
 
 		Building(int start, int height, int end) {
 			this.start = start;
 			this.height = height;
 			this.end = end;
 		}
-
 	}
 }
