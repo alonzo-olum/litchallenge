@@ -14,11 +14,8 @@ public class SkylineProblem {
 		result.stream().forEach(s -> System.out.println("["+s.coordinate+", "+s.height+"]"));
 	}
 
-
 	private static class Builder {
-		private int count = 0;
 		private List<Building> buildings;
-
 	 /*
 	  * add a skyline
 	  * @param array of building coordinates [{left, right, height},...]
@@ -30,6 +27,7 @@ public class SkylineProblem {
 			//buildings = Arrays.stream(builds).collect(ArrayList::new, (list, b) -> list.add(new Building(b[0], b[2], b[1])), ArrayList::addAll);
 			return this;
 		}
+
 		public List<Building> build() {
 			return this.buildings;
 		}
