@@ -1,62 +1,71 @@
-import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.stream.IntStream;
 
 class Topsort {
-	public static int[] topsort(int elements, int[][] preqs) {
-		/* model the Graph: [[a,b]]
-		 * where a,b is the dest,src respectively
-		 */
+	public static void main(String[] args) {
+		int[][] reqs = new int[][]{{2,1}, {3,1}, {4, 3}, {4,1}};
+		List<Integer> order = Topsort.topsort(reqs.length, reqs);
+		order.forEach(System.out::println);
+	}
+
+	/*
+	 * topsort [[b, a], ...]
+	 * where a,b is the src, dest respectively
+	 * @param: int elements
+	 * @param: int[][] graph
+	 */
+	public static List<Integer> topsort(int elements, int[][] preqs) {
 		Map<Integer, List<Integer>> adjacentMap = new HashMap<>();
-		/*
-		 * in-degree of each node
-		 */
-		int[] inDegree = new int[elements];
-		/*
-		 * output correct sequence
-		 */
-		int[] topOrder = new int[elements];
+		Map<Integer, Integer> inDegrees = new HashMap<>();
+
 		for (int i=0; i<preqs.length; i++) {
-			int src = preqs[i][1];
-			int dest = preqs[i][0];
-
-			List<Integer> list = adjacentMap.getOrDefault(src,
-					new ArrayList<Integer>());
-			list.add(dest);
-			adjacentMap.put(src, list);
-			inDegree[dest] += 1;
+			int src = preqs[i][1], dest = preqs[i][0];
+			// model the Graph: [[a,[b,..]], ...]
+			adjacentMap.computeIfAbsent(src, k -> new ArrayList<>()).add(dest);
+			// in-degree of each node
+			inDegrees.put(dest, inDegrees.getOrDefault(dest, 0) + 1);
+			inDegrees.putIfAbsent(src, 0);
 		}
-		/*
-		 * add all nodes whose in-degree is 0
-		 * use a queue for that
-		 */
+		// add all nodes whose in-degree is 0 to a queue
 		Queue<Integer> queue = new LinkedList<Integer>();
-		IntStream.range(0, elements)
-			.filter(i -> inDegree[i] == 0)
-			.forEach(i -> queue.add(i)); // although this is concise, this side-effect equals bad code smell
+		for (Map.Entry<Integer, Integer> entry : inDegrees.entrySet()) {
+			if (entry.getValue() == 0)
+				queue.add(entry.getKey());
+		}
+		return traverse(queue, adjacentMap, inDegrees);	
+	}
 
-		int i = 0;
-		
+	/*
+	 * traverse in FIFO for neighbors who have no indegree
+	 * @param: Queue<Integer>
+	 * @param: Map<Integer, List<Integer>> i.e dependencies : [dependants]
+	 * @param: Map<Integer, Integer>indegrees
+	 */
+	private static List<Integer> traverse(
+			Queue<Integer> queue,
+			Map<Integer, List<Integer>> adjacentMap,
+			Map<Integer, Integer> inDegrees
+			) {
+		List<Integer> topOrder = new ArrayList<>();
 		while (!queue.isEmpty()) {
-		    int node = queue.remove();
-		    topOrder[i++] = node;
+		    int node = queue.poll();
+		    topOrder.add(node);
 		    if (adjacentMap.containsKey(node)) {
-				    for (Integer neighbour : adjacentMap.get(node)) {
-				        inDegree[neighbour]--;
-					      if (inDegree[neighbour] == 0) {
+				    for (int neighbour : adjacentMap.get(node)) {
+				        inDegrees.put(neighbour, inDegrees.get(neighbour) - 1);
+					      if (inDegrees.get(neighbour) == 0) {
 						        queue.add(neighbour);
 					      }
 			      }
 			  }
 		}
-
-		if (i == elements)
-			return topOrder;
-
-		return new int[0];
+		if (topOrder.size() != inDegrees.size())
+			throw new IllegalStateException("Graph has a cycle!");
+		return topOrder;
 	}
 }
