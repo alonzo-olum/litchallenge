@@ -1,5 +1,4 @@
-class simpleIN{
-
+class SimpleIO{
 	public static void main(String[] args){
 			int b=0;
 		try{

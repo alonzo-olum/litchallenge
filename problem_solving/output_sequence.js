@@ -1,7 +1,7 @@
 
 // input sequence: ['a1','a2','a3','a4','a5','a6','a7','a8']
-function output_sequence(sequence) {
-	let tag = 'a';
+output_sequence = (sequence) => {
+	const tag = 'a';
 	let incrValue = 3;
 	let decrValue = 1;
 

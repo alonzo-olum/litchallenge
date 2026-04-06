@@ -1,5 +1,9 @@
 
 class LongestPalindrome {
+	public static void main(String[] args) {
+		String arg = args[0];
+		System.out.println(longestPalindrom(arg));
+	}
 	public static String longestPalindrom(String s) {
 		int start = 0, end = 0;
 		for (int i = 0; i < s.length(); i++) {

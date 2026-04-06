@@ -2,7 +2,7 @@ import java.io.*;
 /**
  * Read and print, using BufferedReader from System.in, onto System.out
  */
-public class stdinput{
+public class StdInput{
 	public static void main(String[] args){
 		try{
 			BufferedReader is = new BufferedReader(
