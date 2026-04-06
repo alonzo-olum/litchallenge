@@ -25,7 +25,7 @@ class CountLOC {
 				if (line.isEmpty())
 					continue;
 				// Case where we encounter ending */
-				if (text.endsWith(STAR_SLASH)) {
+				if (text.startsWith(STAR_SLASH)) {
 					if (inComment)
 						inComment = false;
 					continue;
