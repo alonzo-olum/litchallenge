@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +32,7 @@ class DebugLog {
 		}
 		boolean err = false;
 		frontier.offer(events.get(++index));
-		while (!frontier.isEmpty() && index < events.size()) {
+		while (!frontier.isEmpty() && index < events.size() - 1) {
 			int e = frontier.poll();
 			if (explored.contains(e))
 				continue;
@@ -54,5 +55,14 @@ class DebugLog {
 		}
 		// no unresolved errrors
 		return !err;
+	}
+
+	public static void main(String[] args) {
+		List<Integer> events = new ArrayList<>();
+		events.add(0, 0);
+		events.add(1, 3);
+		events.add(2, 2);
+		events.add(3, 1);
+		System.out.println(isValid(events));
 	}
 }
